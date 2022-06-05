@@ -18,7 +18,7 @@ jobs:
       - name: Docker Build
         run: docker build \
           -f ./docker/Dockerfile \
-          -t ${{ lowercase(github.repository) }} .
+          -t ${{ secrets.CONTAINER_NAME }} .
       - name: Tags
         run: |
           docker tag ${{ secrets.CONTAINER_NAME }} ${{ secrets.DOCKER_HOST }}/${{ secrets.CONTAINER_NAME }}:${{github.sha}}
