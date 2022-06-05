@@ -1,3 +1,5 @@
+# 도커 이미지를 여러개 만들어서 componer,frontend 빌드용을 만들어야 함
+
 # Composer
 FROM composer:latest as vendor
 
