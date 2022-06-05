@@ -16,9 +16,7 @@ jobs:
       - name: Docker login
         run: docker login -u ${{ secrets.DOCKER_ID }} -p ${{ secrets.DOCKER_TOKEN }} ${{ secrets.DOCKER_HOST }}
       - name: Docker Build
-        run: docker build \
-          -f ./docker/Dockerfile \
-          -t ${{ secrets.CONTAINER_NAME }} .
+        run: docker build -f ./docker/Dockerfile -t ${{ secrets.CONTAINER_NAME }} .
       - name: Tags
         run: |
           docker tag ${{ secrets.CONTAINER_NAME }} ${{ secrets.DOCKER_HOST }}/${{ secrets.CONTAINER_NAME }}:${{github.sha}}
