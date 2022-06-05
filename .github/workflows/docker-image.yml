@@ -16,12 +16,14 @@ jobs:
       - name: Docker login
         run: docker login -u ${{ secrets.DOCKER_ID }} -p ${{ secrets.DOCKER_TOKEN }} ${{ secrets.DOCKER_HOST }}
       - name: Docker Build
-        run: docker build -f ./docker/Dockerfile -t ${{ lowercase(github.repository) }} .
+        run: docker build \
+          -f ./docker/Dockerfile \
+          -t ${{ lowercase(github.repository) }} .
       - name: Tags
         run: |
-          docker tag ${{ lowercase(github.repository) }} ${{ secrets.DOCKER_HOST }}/${{ lowercase(github.repository) }}:${{github.sha}}
-          docker tag ${{ lowercase(github.repository) }} ${{ secrets.DOCKER_HOST }}/${{ lowercase(github.repository) }}:latest
+          docker tag ${{ secrets.CONTAINER_NAME }} ${{ secrets.DOCKER_HOST }}/${{ secrets.CONTAINER_NAME }}:${{github.sha}}
+          docker tag ${{ secrets.CONTAINER_NAME }} ${{ secrets.DOCKER_HOST }}/${{ secrets.CONTAINER_NAME }}:latest
       - name: Push
         run: |
-          docker push ${{ secrets.DOCKER_HOST }}/${{ lowercase(github.repository) }}:${{github.sha}}
-          docker push ${{ secrets.DOCKER_HOST }}/${{ lowercase(github.repository) }}:latest
+          docker push ${{ secrets.DOCKER_HOST }}/${{ secrets.CONTAINER_NAME }}:${{github.sha}}
+          docker push ${{ secrets.DOCKER_HOST }}/${{ secrets.CONTAINER_NAME }}:latest
