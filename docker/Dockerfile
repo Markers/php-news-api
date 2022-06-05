@@ -32,6 +32,7 @@ COPY . /var/www/html
 RUN cp /var/www/html/docker/000-default.conf /etc/apache2/sites-enabled/000-default.conf
 RUN cp /var/www/html/.env.production /var/www/html/.env
 RUN docker-php-ext-install mysqli pdo pdo_mysql
+RUN a2enmod headers
 
 RUN chown -R www-data:www-data /var/www/html/bootstrap/cache
 RUN chown -R www-data:www-data /var/www/html/storage
