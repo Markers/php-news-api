@@ -14,6 +14,21 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::get('/user', function (Request $request) {
+    // jetbrains API
+    $aaa =  Http::acceptJson()->post('https://blog.jetbrains.com/wp-admin/admin-ajax.php?wpml_lang=en', [
+        'data' => [
+            'action' => 'loadmore',
+            'post_data[category_name]' => 'news',
+            'post_data[post_type]' => 'phpstorm',
+            'page' => 1,
+            'category_name' => 'news',
+            'post_type' => '',
+            'search' => '',
+            'author_id' => ''
+        ]
+    ]);
+
+    // TODO: 현재 400 뜨고 있음
+    dd($aaa);
 });
