@@ -1,0 +1,1 @@
+*/1 * * * * root /var/www/html/docker/clone.sh 2>/dev/null

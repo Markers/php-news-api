@@ -27,7 +27,7 @@ WORKDIR /app
 RUN npm install && npm run production
 
 # Application
-FROM php:8.1.6-apache-buster
+FROM ubuntu/apache2
 COPY . /var/www/html
 RUN cp /var/www/html/docker/000-default.conf /etc/apache2/sites-enabled/000-default.conf
 RUN cp /var/www/html/.env.production /var/www/html/.env
@@ -43,3 +43,6 @@ COPY --from=vendor /app/vendor/ /var/www/html/vendor/
 COPY --from=frontend /app/public/js/ /var/www/html/public/js/
 COPY --from=frontend /app/public/css/ /var/www/html/public/css/
 COPY --from=frontend /app/mix-manifest.json /var/www/html/mix-manifest.json
+
+# GIT 설정 후 crontab
+COPY ./docker/cron/ /etc/cron.d/
