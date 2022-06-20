@@ -18,7 +18,7 @@ Route::prefix('v1')->group(function () {
 
     Route::get('/php-annotated-monthly', function (Request $request) {
         // jetbrains API
-        $data =  Storage::get('php-annotated-monthly.json');
+        $data =  Storage::get('mock/php-annotated-monthly.json');
         return response($data, 200);
     });
 });
