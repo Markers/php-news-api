@@ -68,6 +68,7 @@ class CrawlingController extends Controller
                         'publish_date' => $publish_date,
                         'author' => $author,
                         'author_avatar' => $author_avatar,
+                        'category' => 'php-annotated-monthly'
                     ];
                     $resilt = Article::create($res[count($res) - 1]);
                 }
