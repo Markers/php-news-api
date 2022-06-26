@@ -31,5 +31,6 @@ Route::prefix('v1')->group(function () {
     });
 
     // jetbrains 크롤링 해서 post_id 검색 결과 받아 오기
-    Route::get("/crawling/php-annotated", [CrawlingController::class, 'crawling']);
+    Route::get("/crawling", [CrawlingController::class, 'getNewPostCrawling']);
+    Route::get("/crawling/content", [CrawlingController::class, 'getContentCrawling']);
 });
