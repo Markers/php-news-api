@@ -25,11 +25,15 @@ return new class extends Migration
             $table->unsignedSmallInteger('height')->comment('height');
             $table->string('sizes')->nullable()->comment('css sizes');
             $table->string('title')->comment("제목");
-            $table->string('description')->comment("설명");
+            $table->text('description')->comment("설명");
             $table->date('publish_date')->comment("작성일");
             // 작성자 정보
             $table->string('author')->comment("작성자");
             $table->string('author_avatar')->nullable()->comment("작성자 아바타 URL");
+            // 내용에 들어 가는 정보
+            $table->text('content')->nullable()->comment("내용");
+            $table->json('tags')->nullable()->comment("태그");
+            // Tag 랑 조인 할건데 나중에 샤딩하자.
             // 구분을 위한 정보
             $table->enum('category', ['news', 'tutorials', 'videos', 'php-annotated-monthly','features', 'eap'])->index()->comment('카테고리');
             // 번역 정보를 제공
