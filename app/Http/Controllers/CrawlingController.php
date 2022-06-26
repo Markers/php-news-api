@@ -14,12 +14,26 @@ class CrawlingController extends Controller
     {
         // URL로부터 DOM 객체를 생성
         // 모든 이미지 태그를 검색 후 주소 출력
-        $res = $this->CrawlingProjectTag('https://blog.jetbrains.com/phpstorm/', '.latest_posts_section');
+        $res = $this->CrawlingProjectTag('https://blog.jetbrains.com/phpstorm/category/videos/', 'php-annotated-monthly');
+        $res = $this->CrawlingProjectTag('https://blog.jetbrains.com/phpstorm/category/videos/', 'videos');
+        $res = $this->CrawlingProjectTag('https://blog.jetbrains.com/phpstorm/category/tutorials/', 'tutorials');
+        $res = $this->CrawlingProjectTag('https://blog.jetbrains.com/phpstorm/category/news/', 'news');
+        $res = $this->CrawlingProjectTag('https://blog.jetbrains.com/phpstorm/category/features/', 'features');
+        $res = $this->CrawlingProjectTag('https://blog.jetbrains.com/phpstorm/category/events/', 'events');
+        $res = $this->CrawlingProjectTag('https://blog.jetbrains.com/phpstorm/category/eap/', 'eap');
+        return $res;
     }
 
-    public function CrawlingProjectTag($url, $tag)
+
+    /**
+     * @param string $url
+     * @param string $category
+     * @return array|false
+     * @throws GuzzleException
+     */
+    private function CrawlingProjectTag(string $url, string $category)
     {
-        $res = [];
+        $res = array();
         $client = new \GuzzleHttp\Client();
         $response = $client->request('GET', $url);
 
@@ -30,7 +44,7 @@ class CrawlingController extends Controller
             $dom = new DOMDocument();
             @$dom->loadHTML($html);
             $xpath = new DOMXPath($dom);
-            $articleList = $xpath->query('//div[@class="row latest latest_posts_section"]/div[@class="col"]');
+            $articleList = $xpath->query('//div[@class="row card_container"]/div[@class="col"]');
             foreach ($articleList as $article) {
                 $post_id = $article->getAttribute('post_id');
                 $has_post = Article::where('post_id', $post_id)->count();
@@ -68,12 +82,19 @@ class CrawlingController extends Controller
                         'publish_date' => $publish_date,
                         'author' => $author,
                         'author_avatar' => $author_avatar,
-                        'category' => 'php-annotated-monthly'
+                        'category' => $category,
+                        'created_at' => \Carbon\Carbon::now(),
+                        'updated_at' => \Carbon\Carbon::now(),
                     ];
-                    $resilt = Article::create($res[count($res) - 1]);
                 }
             }
+            if (count($res) > 0) {
+                Article::insert($res);
+            }
+            return $res;
         }
+        // TODO Exception 처리 해서 메세지 오도록 할 예정
+        return false;
     }
 
     private function getElementsByClassName($dom, $ClassName, $tagName = null)

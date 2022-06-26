@@ -35,7 +35,7 @@ return new class extends Migration
             $table->json('tags')->nullable()->comment("태그");
             // Tag 랑 조인 할건데 나중에 샤딩하자.
             // 구분을 위한 정보
-            $table->enum('category', ['news', 'tutorials', 'videos', 'php-annotated-monthly','features', 'eap'])->index()->comment('카테고리');
+            $table->enum('category', ['news', 'tutorials', 'videos', 'php-annotated-monthly','features', 'events', 'eap'])->index()->comment('카테고리');
             // 번역 정보를 제공
             $table->string("slug")->nullable()->comment("슬러그");
             $table->string("translated_title")->nullable()->comment("번역된 제목");
