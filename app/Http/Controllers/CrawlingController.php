@@ -181,6 +181,7 @@ class CrawlingController extends Controller
         return $Matched;
     }
 
+    // TODO: 사용을 해야 하나 말아야 하나 대단히 고민중.. 번역에서 어떻게 될 지 테스트를 더 해봐야 할 것 같음.
     private function replaceText(string $string)
     {
         $string = str_replace('&#147;', '“', $string);
