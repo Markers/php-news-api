@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Article;
 use DOMDocument;
 use DOMXPath;
+use Google\Cloud\Translate\V2\TranslateClient;
 use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\DomCrawler\Crawler;
 
@@ -15,50 +16,27 @@ class CrawlingController extends Controller
         $articles = Article::whereContent(null)->get();
         foreach ($articles as $article) {
             try {
-                $html = $this->getContent('https://blog.jetbrains.com/phpstorm/2022/06/php-annotated-june-2022/');
+                $html = $this->getContent($article->href);
+                // $this->executeTranslation($html);
+                return $html;
             } catch (GuzzleException $e) {
                 return $e->getMessage();
             }
-            $content = $this->replaceInnerText($html);
-            return $content;
         }
-
     }
 
-    /**
-     * @param $html
-     * @return void
-     */
-    private function replaceInnerText($html)
+    public function executeTranslation($html)
     {
-        $doc = new DOMDocument;
-        @$doc->loadHTML($html);
-        $crawler = new Crawler($doc);
-        $crawler
-            ->filter('div.content')
-            ->each(function (Crawler $crawler) use ($doc) {
-                foreach ($crawler as $node) {
-                    $span = $doc->createElement('span', 'test');
-                    $node->parentNode->insertBefore($span, $node);
-                }
-            });
-        echo ($crawler->html());
-        exit;
-        $content = $crawler->filter('.content')->html();
-        return $content;
-
-
-
-        $dom = new DOMDocument();
-        @$dom->loadHTML($html);
-        $xpath = new DOMXPath($dom);
-        $nodes = $xpath->query('//*[@class="content"]');
-//        foreach ($nodes as $node) {
-////            $node->nodeValue = $this->replaceText($node->nodeValue);
-//        }
-        return $dom->saveHTML();
+        try {
+            $translate = new TranslateClient(['key' => env('GOOGLE_TRANSLATE_API_KEY')]);
+            return $translate->translate(
+                $html,
+                ['target' => 'ko']
+            );
+        } catch (\Exception $e) {
+            return $e->getMessage();
+        }
     }
-
 
     /**
      * 새로 등록된 포스트의 내용을 가져오는 함수
@@ -73,9 +51,7 @@ class CrawlingController extends Controller
         $body = $response->getBody();
         $html = $body->getContents();
         $crawler = new Crawler($html);
-        $content = $crawler->filter('.article-section')->html();
-//        $content = preg_replace('/\r\n|\r|\n/', '', $content);
-        return $content;
+        return $crawler->filter('.article-section')->html();
     }
 
     /**
@@ -114,7 +90,6 @@ class CrawlingController extends Controller
             // 성공 메세지 Discord 로 훅한다.
         }
     }
-
 
     /**
      * @param string $url
