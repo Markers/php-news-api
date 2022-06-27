@@ -208,6 +208,8 @@ class CrawlingController extends Controller
 
     private function replaceText(string $string)
     {
+        $string = str_replace('&#147;', '“', $string);
+        $string = str_replace('&#128;', '€', $string);
         $string = str_replace('&nbsp;', ' ', $string);
         $string = str_replace('&amp;', '&', $string);
         $string = str_replace('&quot;', '"', $string);
@@ -230,7 +232,6 @@ class CrawlingController extends Controller
         $string = str_replace('&#8216;', '‘', $string);
         $string = str_replace('&#8217;', '’', $string);
         $string = str_replace('&#8218;', '‚', $string);
-        $string = str_replace('&#8219;', '‛', $string);
-        return $string;
+        return str_replace('&#8219;', '‛', $string);
     }
 }
