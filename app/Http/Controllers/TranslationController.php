@@ -18,6 +18,16 @@ class TranslationController extends Controller
         }
     }
 
+    public function translateTheContent()
+    {
+        $articles = Article::whereNull('translated_content')->whereNotNull('content')->get();
+        foreach ($articles as $article) {
+            $article->translated_content = $this->executeTranslation($article->content);
+            $article->is_translation = true;
+            $article->save();
+        }
+    }
+
     private function executeTranslation($html)
     {
         try {
