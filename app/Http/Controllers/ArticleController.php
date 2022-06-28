@@ -19,4 +19,10 @@ class ArticleController extends Controller
         $articles = Article::where('is_translation', true)->where('category', $category)->get();
         return new ArticleCollection($articles);
     }
+
+    public function allArticle()
+    {
+        $articles = Article::where('is_translation', true)->get();
+        return new ArticleCollection($articles);
+    }
 }

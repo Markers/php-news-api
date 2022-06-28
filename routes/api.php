@@ -39,5 +39,6 @@ Route::prefix('v1')->group(function () {
 
     Route::get('/translate', [TranslationController::class, 'translateTheDetails']);
 
-    Route::get('/article/{category}', [ArticleController::class, 'articles']);
+    Route::get('/articles', [ArticleController::class, 'allArticle']);
+    Route::get('/articles/{category}', [ArticleController::class, 'articles']);
 });
