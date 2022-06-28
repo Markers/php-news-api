@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\CrawlingController;
 use App\Http\Controllers\TranslationController;
 use Illuminate\Http\Request;
@@ -37,4 +38,6 @@ Route::prefix('v1')->group(function () {
     Route::get("/crawling/content", [CrawlingController::class, 'getContentCrawling']);
 
     Route::get('/translate', [TranslationController::class, 'translateTheDetails']);
+
+    Route::get('/article/{category}', [ArticleController::class, 'articles']);
 });
