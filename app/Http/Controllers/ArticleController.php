@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\ArticleCollection;
+use App\Http\Resources\ArticleResource;
 use App\Models\Article;
 
 class ArticleController extends Controller
@@ -24,5 +25,11 @@ class ArticleController extends Controller
     {
         $articles = Article::where('is_translation', true)->get();
         return new ArticleCollection($articles);
+    }
+
+    public function articlePost($post_id)
+    {
+        $articles = Article::wherePostId($post_id)->first();
+        return new ArticleResource($articles);
     }
 }

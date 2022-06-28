@@ -37,8 +37,12 @@ Route::prefix('v1')->group(function () {
     // 내용을 가져 오지 않은 포스트 크롤링 함 (내용)
     Route::get("/crawling/content", [CrawlingController::class, 'getContentCrawling']);
 
+    // 포스트 부가 정보 번역
     Route::get('/translate', [TranslationController::class, 'translateTheDetails']);
+    // 포스트 내용 번역
+    Route::get('/translate/content', [TranslationController::class, 'translateTheContent']);
 
     Route::get('/articles', [ArticleController::class, 'allArticle']);
     Route::get('/articles/{category}', [ArticleController::class, 'articles']);
+    Route::get('/articles/post/{post_id}', [ArticleController::class, 'articlePost']);
 });
