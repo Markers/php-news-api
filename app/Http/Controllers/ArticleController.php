@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ArticleCollection;
 use App\Models\Article;
 
 class ArticleController extends Controller
@@ -16,6 +17,6 @@ class ArticleController extends Controller
             ], 400);
         }
         $articles = Article::where('is_translation', true)->where('category', $category)->get();
-        return json_decode($articles[0]->translated_description)->text;
+        return new ArticleCollection($articles);
     }
 }
