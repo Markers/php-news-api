@@ -14,13 +14,22 @@ class TranslationController extends Controller
             $translated_title = $this->executeTranslation($article->title);
             $slug = trim($translated_title->text);
             $slug = strtolower(preg_replace('/[^a-zA-Z가-힣0-9]+/', '-', $slug));
-
+            $slug = $this->replaceDoubleHyphen($slug);
             $article->translated_title = $translated_title;
             $article->translated_description = $this->executeTranslation($article->description);
             $article->slug = $slug;
             $article->is_translation = true;
             $article->save();
         }
+    }
+
+    private function replaceDoubleHyphen($str)
+    {
+        $str = preg_replace('/--/', '-', $str);
+        if (str_contains($str, '--')) {
+            $this->replaceDoubleHyphen($str);
+        }
+        return $str;
     }
 
     public function translateTheContent()
