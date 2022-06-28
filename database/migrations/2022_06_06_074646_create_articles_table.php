@@ -38,9 +38,10 @@ return new class extends Migration
             $table->enum('category', ['news', 'tutorials', 'videos', 'php-annotated-monthly','features', 'events', 'eap'])->index()->comment('카테고리');
             // 번역 정보를 제공
             $table->string("slug")->nullable()->comment("슬러그");
-            $table->text("translated_title")->nullable()->comment("번역된 제목");
+            $table->json("translated_title")->nullable()->comment("번역된 제목");
             $table->string("translated_url")->nullable()->comment("번역된 파일 URL");
-            $table->text("translated_description")->nullable()->comment("번역된 설명");
+            $table->json("translated_description")->nullable()->comment("번역된 설명");
+            $table->json("translated_content")->nullable()->comment("번역된 내용");
             $table->boolean('is_translation')->default(false)->comment("번역 상태");
             $table->timestamps();
         });
