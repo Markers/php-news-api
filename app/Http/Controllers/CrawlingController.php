@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Article;
 use DOMDocument;
 use DOMXPath;
-use Google\Cloud\Translate\V2\TranslateClient;
 use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\DomCrawler\Crawler;
 
@@ -16,25 +15,16 @@ class CrawlingController extends Controller
         $articles = Article::whereContent(null)->get();
         foreach ($articles as $article) {
             try {
-                $html = $this->getContent($article->href);
-                // $this->executeTranslation($html);
-                return $html;
+                $article->content = $this->getContent($article->href);
+                $article->save();
             } catch (GuzzleException $e) {
-                return $e->getMessage();
+                \Log::error("번역 에러", $e->getMessage());
             }
         }
-    }
-
-    public function executeTranslation($html)
-    {
-        try {
-            $translate = new TranslateClient(['key' => env('GOOGLE_TRANSLATE_API_KEY')]);
-            return $translate->translate(
-                $html,
-                ['target' => 'ko']
-            );
-        } catch (\Exception $e) {
-            return $e->getMessage();
+        if (count($articles) > 0) {
+            return response()->json(['success' => true]);
+        } else {
+            return response()->json(['success' => false]);
         }
     }
 
