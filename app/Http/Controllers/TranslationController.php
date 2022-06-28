@@ -11,8 +11,13 @@ class TranslationController extends Controller
     {
         $articles = Article::where('is_translation', false)->get();
         foreach ($articles as $article) {
-            $article->translated_title = $this->executeTranslation($article->title);
+            $translated_title = $this->executeTranslation($article->title);
+            $slug = trim($translated_title->text);
+            $slug = strtolower(preg_replace('/[^a-zA-Z가-힣0-9]+/', '-', $slug));
+
+            $article->translated_title = $translated_title;
             $article->translated_description = $this->executeTranslation($article->description);
+            $article->slug = $slug;
             $article->is_translation = true;
             $article->save();
         }
