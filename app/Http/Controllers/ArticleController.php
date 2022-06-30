@@ -27,9 +27,9 @@ class ArticleController extends Controller
         return new ArticleCollection($articles);
     }
 
-    public function articlePost($post_id)
+    public function articlePost($category, $post_id)
     {
-        $articles = Article::wherePostId($post_id)->first();
+        $articles = Article::wherePostId($post_id)->whereCategory($category)->first();
         return new ArticleResource($articles);
     }
 }
