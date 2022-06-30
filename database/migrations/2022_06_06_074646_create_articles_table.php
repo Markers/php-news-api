@@ -18,7 +18,7 @@ return new class extends Migration
         Schema::create('articles', function (Blueprint $table) {
             $table->id();
             // Jetbrains 사이트에서 제공하는 정보를 저장한다.
-            $table->integer('post_id')->unique()->comment('웹 페이지의 고유 id');
+            $table->integer('post_id')->comment('웹 페이지의 고유 id');
             $table->string('href')->comment('웹사이트에서의 글 주소');
             $table->string('thumbnail')->nullable()->comment("썸네일 이미지");
             $table->unsignedSmallInteger('width')->comment('width');
@@ -43,6 +43,9 @@ return new class extends Migration
             $table->json("translated_description")->nullable()->comment("번역된 설명");
             $table->json("translated_content")->nullable()->comment("번역된 내용");
             $table->boolean('is_translation')->default(false)->comment("번역 상태");
+
+            // 멀티 유니큐
+            $table->unique(["post_id", "category"], 'post_id_category_unique');
             $table->timestamps();
         });
     }
