@@ -10,16 +10,20 @@ class TranslationController extends Controller
     public function translateTheDetails()
     {
         $articles = Article::where('is_translation', false)->get();
-        foreach ($articles as $article) {
-            $translated_title = $this->executeTranslation($article->title);
-            $slug = trim($translated_title['text']);
-            $slug = strtolower(preg_replace('/[^a-zA-Z가-힣0-9]+/', '-', $slug));
-            $slug = $this->replaceDoubleHyphen($slug);
-            $article->translated_title = $translated_title;
-            $article->translated_description = $this->executeTranslation($article->description);
-            $article->slug = $slug;
-            $article->is_translation = true;
-            $article->save();
+        try {
+            foreach ($articles as $article) {
+                $translated_title = $this->executeTranslation($article->title);
+                $slug = trim($translated_title['text']);
+                $slug = strtolower(preg_replace('/[^a-zA-Z가-힣0-9]+/', '-', $slug));
+                $slug = $this->replaceDoubleHyphen($slug);
+                $article->translated_title = $translated_title;
+                $article->translated_description = $this->executeTranslation($article->description);
+                $article->slug = $slug;
+                $article->is_translation = true;
+                $article->save();
+            }
+        } catch (\Throwable $th) {
+            return $th;
         }
     }
 
