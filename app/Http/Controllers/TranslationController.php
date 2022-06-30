@@ -51,7 +51,7 @@ class TranslationController extends Controller
                 ['target' => 'ko']
             );
         } catch (\Exception $e) {
-            return $e->getMessage();
+            throw  $e->getMessage();
         }
     }
 }
