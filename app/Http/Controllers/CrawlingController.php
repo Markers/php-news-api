@@ -51,7 +51,7 @@ class CrawlingController extends Controller
      */
     public function getNewPostCrawling(): void
     {
-        $phpAnnotatedMonthly = $this->CrawlingProjectTag('https://blog.jetbrains.com/phpstorm/category/videos/', 'php-annotated-monthly');
+        $phpAnnotatedMonthly = $this->CrawlingProjectTag('https://blog.jetbrains.com/phpstorm/tag/php-annotated-monthly/', 'php-annotated-monthly');
         if ($phpAnnotatedMonthly) {
             // 성공 메세지 Discord 로 훅한다.
         }
@@ -103,7 +103,7 @@ class CrawlingController extends Controller
             $articleList = $xpath->query('//div[@class="row card_container"]/div[@class="col"]');
             foreach ($articleList as $article) {
                 $post_id = $article->getAttribute('post_id');
-                $has_post = Article::where('post_id', $post_id)->count();
+                $has_post = Article::where('post_id', $post_id)->where('category', $category)->count();
                 if ($has_post == 0) {
                     $href = $article->getElementsByTagName('a')->item(0)->getAttribute('href');
                     $thumbnail = $article->getElementsByTagName('img')->item(0)->getAttribute('src');
