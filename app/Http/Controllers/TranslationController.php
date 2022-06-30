@@ -12,7 +12,7 @@ class TranslationController extends Controller
         $articles = Article::where('is_translation', false)->get();
         foreach ($articles as $article) {
             $translated_title = $this->executeTranslation($article->title);
-            $slug = trim($translated_title->text);
+            $slug = trim($translated_title['text']);
             $slug = strtolower(preg_replace('/[^a-zA-Z가-힣0-9]+/', '-', $slug));
             $slug = $this->replaceDoubleHyphen($slug);
             $article->translated_title = $translated_title;
