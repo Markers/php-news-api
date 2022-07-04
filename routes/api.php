@@ -31,4 +31,6 @@ Route::prefix('v1')->group(function () {
     Route::get('/articles', [ArticleController::class, 'allArticle']);
     Route::get('/articles/{category}', [ArticleController::class, 'articles']);
     Route::get('/articles/{category}/{post_id}', [ArticleController::class, 'articlePost']);
+
+    Route::get('markdown-format', [\App\Http\Controllers\MarkdownController::class, 'createMarkdown']);
 });
