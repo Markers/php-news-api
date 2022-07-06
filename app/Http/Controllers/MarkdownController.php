@@ -3,20 +3,24 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
+use GrahamCampbell\GitHub\GitHubManager;
 use Illuminate\Support\Facades\Storage;
 use League\HTMLToMarkdown\HtmlConverter;
 
 class MarkdownController extends Controller
 {
     private HtmlConverter $converter;
+    protected GitHubManager $github;
 
-    public function __construct()
+    public function __construct(GitHubManager $github)
     {
         $this->converter = new HtmlConverter();
+        $this->github = $github;
     }
 
     public function createMarkdown()
     {
+        $markdown_files = [];
         Article::where('translated_url', null)->chunk(100, function ($articles) {
             foreach ($articles as $article) {
                 $post_id = $article->post_id;
@@ -38,8 +42,52 @@ class MarkdownController extends Controller
 
                 $article->translated_url = $file_path;
                 $article->save();
+
+                $markdown_files[] = array(
+                    'path' => 'mock/' . $file_path,
+                    'content' => $markdown
+                );
+            }
+            // 배열에 추가된 것이 있으면 Upload
+            $file_count = count($markdown_files);
+            if ($file_count > 0) {
+                $dt = \Carbon\Carbon::now();
+                $this->commitFiles('kyungseo-park', 'php-news', 'main', "API: ".$dt. "에 $file_count 개 업로드", $markdown_files);
             }
         });
+    }
+
+    public function commitFiles(string $github_nickname, string $repo_name, string $branch, string $commit_message, array $files)
+    {
+        $master_branch = $this->github->repo()->branches($github_nickname, $repo_name, $branch);
+        $commit_parent = $master_branch["commit"]["sha"];
+        $base_tree = $master_branch["commit"]["commit"]["tree"]["sha"];
+
+        $commit_tree = array();
+        foreach ($files as $file) {
+            $file_blob = [
+                "path" => $file["path"],
+                "mode" => "100644",
+                "type" => "file",
+                "content" => $file["content"],
+            ];
+            $commit_tree[] = $file_blob;
+        }
+
+        $new_commit_tree_response = $this->github->git()->trees()->create($github_nickname, $repo_name, [
+            "base_tree" => $base_tree,
+            "tree" => $commit_tree
+        ]);
+
+        $new_commit_response = $this->github->git()->commits()->create($github_nickname, $repo_name, [
+            "message" => $commit_message,
+            "parents" => [$commit_parent],
+            "tree" => $new_commit_tree_response["sha"],
+        ]);
+        $this->github->git()->references()->update($github_nickname, $repo_name, "heads/" . $branch, [
+            "sha" => $new_commit_response["sha"],
+            "force" => false,
+        ]);
     }
 
     private function replaceDoubleHyphen($str)
