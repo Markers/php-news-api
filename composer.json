@@ -8,6 +8,7 @@
         "php": "^8.0.2",
         "ext-dom": "20031129",
         "google/cloud-translate": "^1.12",
+        "graham-campbell/github": "^11.0",
         "guzzlehttp/guzzle": "^7.4",
         "laravel/framework": "^9.11",
         "laravel/sanctum": "^2.14.1",
