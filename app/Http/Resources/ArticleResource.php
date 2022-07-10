@@ -27,7 +27,7 @@ class ArticleResource extends JsonResource
             'author' => $this->author,
             'author_avatar' => $this->author_avatar,
             // TODO: 네트워크 속도 생각해서 뺌 (서버가 좋지 않다.)
-             'content' => $this->content,
+            'content' => $this->content,
             'tags' => $this->tags,
             'category' => $this->category,
             'slug' => $this->slug,
