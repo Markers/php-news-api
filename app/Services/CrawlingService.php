@@ -27,8 +27,8 @@ class CrawlingService
      */
     public function run()
     {
-        DB::beginTransaction();
         try {
+            DB::beginTransaction();
             // 새로 등록된 글이 있나 조회
             $crawlingUrl = $this->crawlingUrl;
             foreach ($crawlingUrl as $key => $value) {
