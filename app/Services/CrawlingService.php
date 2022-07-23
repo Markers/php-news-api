@@ -44,7 +44,7 @@ class CrawlingService
             DB::commit();
         } catch (GuzzleException $e) {
             DB::rollBack();
-            \Log::error("에러", $e->getMessage());
+            \Log::error("crawling error", $e->getMessage());
         }
     }
 
