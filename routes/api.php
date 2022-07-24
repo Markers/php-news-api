@@ -34,4 +34,7 @@ Route::prefix('v1')->group(function () {
 
     // 마크다운 생성
     Route::get('markdown-format', [\App\Http\Controllers\MarkdownController::class, 'createMarkdown']);
+
+    // 썸네일 생성을 위한 테스트 api
+    Route::get('test', [\App\Http\Controllers\MarkdownController::class, 'test']);
 });

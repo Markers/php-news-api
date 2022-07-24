@@ -6,7 +6,8 @@ use App\Models\Article;
 use GrahamCampbell\GitHub\GitHubManager;
 use Illuminate\Support\Facades\Storage;
 use League\HTMLToMarkdown\HtmlConverter;
-
+use Intervention\Image\ImageManagerStatic as Image;
+//use Intervention\Image\Facades\Image;
 class MarkdownController extends Controller
 {
     private HtmlConverter $converter;
@@ -52,7 +53,7 @@ class MarkdownController extends Controller
             $file_count = count($markdown_files);
             if ($file_count > 0) {
                 $dt = \Carbon\Carbon::now();
-                $this->commitFiles('kyungseo-park', 'php-news', 'main', "API: ".$dt. "에 $file_count 개 업로드", $markdown_files);
+                $this->commitFiles('kyungseo-park', 'php-news', 'main', "API: " . $dt . "에 $file_count 개 업로드", $markdown_files);
             }
         });
     }
@@ -126,5 +127,42 @@ class MarkdownController extends Controller
         $string = str_replace('&#8217;', '’', $string);
         $string = str_replace('&#8218;', '‚', $string);
         return str_replace('&#8219;', '‛', $string);
+    }
+
+    public function test()
+    {
+        try {
+            $titles = "PHP Annotated";
+            $img = Image::make(public_path('storage/images/7.png'));
+            $img->text($titles, 960, 239, function ($font) {
+                $font->file(public_path('storage/images/NanumGothicCoding-Bold.ttf'));
+                $font->size(120);
+                $font->color('#fdf6e3');
+                $font->align('center');
+                $font->valign('middle');
+            });
+
+            // 1920×1233
+            $title_width = "July 2022";
+            $img->text($title_width, 960, 390, function ($font) {
+                $font->file(public_path('storage/images/NanumGothicCoding-Bold.ttf'));
+                $font->size(60);
+                $font->color('#fdf6e3');
+                $font->align('center');
+                $font->valign('middle');
+            });
+            $title_ = "PhpStorm 2022.2 EAP #6: 조롱 지원, 향상된 검사 구성";
+            $img->text($title_, 960, 639, function ($font) {
+                $font->file(public_path('storage/images/NanumGothicCoding-Bold.ttf'));
+                $font->size(50);
+                $font->color('#fdf6e3');
+                $font->align('center');
+                $font->valign('middle');
+            });
+            $img->save(public_path('storage/images/p-7.png'));
+            return true;
+        } catch (\Exception $e) {
+            return $e;
+        }
     }
 }
