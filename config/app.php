@@ -197,6 +197,8 @@ return [
 
         // IDEA 핼퍼
         Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class,
+        // Image 생성
+        Intervention\Image\ImageServiceProvider::class,
     ],
 
     /*
@@ -212,7 +214,8 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         // 'ExampleClass' => App\Example\ExampleClass::class,
-        'GitHub' => GrahamCampbell\GitHub\Facades\GitHub::class
+        'GitHub' => GrahamCampbell\GitHub\Facades\GitHub::class,
+        'Image' => Intervention\Image\Facades\Image::class,
     ])->toArray(),
 
 ];
