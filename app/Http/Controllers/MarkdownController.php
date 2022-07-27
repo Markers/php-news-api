@@ -138,14 +138,13 @@ class MarkdownController extends Controller
     }
     public function thumbnailUpload($articles)
     {
-
         foreach ($articles as $article) {
             $post_id = $article->post_id;
             $category = $article->category;
             $publish_date = $article->publish_date;
             $title = $article->title;
             $img = $this->makeThumbnail($category, $publish_date, $title);
-            return $this->fileUpload("$category/$post_id.png", $img);
+            $this->fileUpload("$category/$post_id.png", $img);
         }
     }
 
@@ -153,9 +152,8 @@ class MarkdownController extends Controller
     {
         try {
             //code...
-            $aa = (string)$img->encode('png');
-            $bb = Storage::disk('s3')->put("$path", $aa);
-            dd($path);
+            $binaryImage = (string)$img->encode('png');
+            Storage::disk('s3')->put("$path", $binaryImage);
         } catch (\Throwable $th) {
             throw $th;
         }
