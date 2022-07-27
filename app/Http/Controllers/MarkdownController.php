@@ -10,13 +10,23 @@ use Intervention\Image\ImageManagerStatic as Image;
 
 class MarkdownController extends Controller
 {
-    private HtmlConverter $converter;
+    protected HtmlConverter $converter;
     protected GitHubManager $github;
 
     public function __construct(GitHubManager $github)
     {
-        $this->converter = new HtmlConverter();
-        $this->github = $github;
+        try {
+            $converter = new HtmlConverter();
+            // $converter = $converter->getConfig()->setOption('strip_tags', true);
+            // $converter = $converter->getConfig()->setOption('strip_placeholder_links', true);
+            // $converter = $converter->getConfig()->setOption('hard_break', true);
+            $this->converter = $converter;
+            $this->github = $github;
+        } catch (\Throwable $e) {
+            print_r($e);
+            exit;
+            \Log::error("jobs error - ", $e->getMessage());
+        }
     }
 
     public function createMarkdown()
@@ -53,7 +63,7 @@ class MarkdownController extends Controller
             $file_count = count($markdown_files);
             if ($file_count > 0) {
                 $dt = \Carbon\Carbon::now();
-                $this->commitFiles('kyungseo-park', 'php-news', 'main', "API: " . $dt . "에 $file_count 개 업로드", $markdown_files);
+                // $this->commitFiles('kyungseo-park', 'php-news', 'main', "API: " . $dt . "에 $file_count 개 업로드", $markdown_files);
             }
         });
     }
