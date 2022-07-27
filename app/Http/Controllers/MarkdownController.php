@@ -7,7 +7,7 @@ use GrahamCampbell\GitHub\GitHubManager;
 use Illuminate\Support\Facades\Storage;
 use League\HTMLToMarkdown\HtmlConverter;
 use Intervention\Image\ImageManagerStatic as Image;
-//use Intervention\Image\Facades\Image;
+
 class MarkdownController extends Controller
 {
     private HtmlConverter $converter;
@@ -128,40 +128,67 @@ class MarkdownController extends Controller
         $string = str_replace('&#8218;', '‚', $string);
         return str_replace('&#8219;', '‛', $string);
     }
-
+    // Title은 번역 되어야 함
+    // 이미지 만들고
+    // 이미지 업로드하고
     public function test()
     {
+        $articles = Article::where('id', 96)->get();
+        return $this->thumbnailUpload($articles);
+    }
+    public function thumbnailUpload($articles)
+    {
+
+        foreach ($articles as $article) {
+            $post_id = $article->post_id;
+            $category = $article->category;
+            $publish_date = $article->publish_date;
+            $title = $article->title;
+            $img = $this->makeThumbnail($category, $publish_date, $title);
+            return $this->fileUpload("$category/$post_id.png", $img);
+        }
+    }
+
+    public function fileUpload($path, $img)
+    {
         try {
-            $titles = "PHP Annotated";
-            $img = Image::make(public_path('storage/images/7.png'));
-            $img->text($titles, 960, 239, function ($font) {
+            //code...
+            $aa = (string)$img->encode('png');
+            $bb = Storage::disk('s3')->put("$path", $aa);
+            dd($path);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
+    public function makeThumbnail($category, $publish, $title)
+    {
+        try {
+            $img = Image::make(public_path("storage/images/$category.png"));
+            $img->text(strtoupper(str_replace('-', ' ', $category)), 960, 239, function ($font) {
                 $font->file(public_path('storage/images/NanumGothicCoding-Bold.ttf'));
                 $font->size(120);
                 $font->color('#fdf6e3');
                 $font->align('center');
                 $font->valign('middle');
             });
-
-            // 1920×1233
-            $title_width = "July 2022";
-            $img->text($title_width, 960, 390, function ($font) {
+            $img->text($publish, 960, 390, function ($font) {
                 $font->file(public_path('storage/images/NanumGothicCoding-Bold.ttf'));
                 $font->size(60);
                 $font->color('#fdf6e3');
                 $font->align('center');
                 $font->valign('middle');
             });
-            $title_ = "PhpStorm 2022.2 EAP #6: 조롱 지원, 향상된 검사 구성";
-            $img->text($title_, 960, 639, function ($font) {
+            $img->text($title, 960, 639, function ($font) {
                 $font->file(public_path('storage/images/NanumGothicCoding-Bold.ttf'));
                 $font->size(50);
                 $font->color('#fdf6e3');
                 $font->align('center');
                 $font->valign('middle');
             });
-            $img->save(public_path('storage/images/p-7.png'));
-            return true;
+            return $img;
         } catch (\Exception $e) {
+            return $e->getMessage();
             return $e;
         }
     }
