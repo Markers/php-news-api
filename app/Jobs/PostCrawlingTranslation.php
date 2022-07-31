@@ -30,6 +30,7 @@ class PostCrawlingTranslation implements ShouldQueue
         $this->crawlingService = new CrawlingService();
         $this->translationService = new TranslationService();
         $this->markdownService = new MarkdownService();
+        $this->thumbnailService = new ThumbnailService();
     }
 
     /**
@@ -41,8 +42,13 @@ class PostCrawlingTranslation implements ShouldQueue
     {
         try {
             $this->crawlingService->run();
+            \Log::info('CrawlingService is finished.');
             $this->translationService->run();
+            \Log::info('translationService is finished.');
             $this->markdownService->run();
+            \Log::info('markdownService is finished.');
+            $this->thumbnailService->run();
+            \Log::info('thumbnailService is finished.');
         } catch (\Throwable $e) {
             \Log::error("jobs error - ", $e->getMessage());
         }
