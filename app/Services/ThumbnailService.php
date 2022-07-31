@@ -4,21 +4,31 @@ namespace App\Services;
 
 use Intervention\Image\ImageManagerStatic as Image;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Article;
 
 class ThumbnailService
 {
     public function run()
     {
-        $article = \App\Article::where('translated_thumbnail', null)->fisrt();
-        $post_id = $article->post_id;
-        $category = $article->category;
-        $publish_date = $article->publish_date;
-        $title = $article->title;
-        $img = $this->makeThumbnail($category, $publish_date, $title);
-        $static_url = config('url');
-        $this->fileUpload("$category/$post_id.png", $img);
-        $article->translated_thumbnail = "$static_url/$category/$post_id.png";
-        $article->save();
+        try {
+            $articles = Article::where('translated_thumbnail', null)->get();
+                foreach ($articles as $article) {
+                    # code...
+                    $post_id = $article->post_id;
+                    $category = $article->category;
+
+                    $img = $this->makeThumbnail(
+                    $category, $article->publish_date, $article->title
+                );
+
+                $static_url = config('url') ?? "https://static.php-news.com";
+                $this->fileUpload("$category/$post_id.png", $img);
+
+                Article::where('id', $article->id)->update(['translated_thumbnail' => "$static_url/$category/$post_id.png"]);
+            }
+        } catch (\Throwable $th) {
+            \Log::error($th->getMessage());
+        }
     }
 
     private function fileUpload($path, $img)

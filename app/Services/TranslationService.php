@@ -17,6 +17,8 @@ class TranslationService
         try {
             DB::beginTransaction();
             $articles = Article::where('is_translation', false)->get();
+            \Log::info("$articles->count() articles are found.");
+            // 에러 나는중
             foreach ($articles as $article) {
                 $translated_title = $this->executeTranslation($article->title);
                 $slug = trim($translated_title['text']);
