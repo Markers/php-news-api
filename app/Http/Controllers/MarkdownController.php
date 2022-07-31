@@ -143,7 +143,7 @@ class MarkdownController extends Controller
     // 이미지 업로드하고
     public function test()
     {
-        $articles = Article::where('id', 96)->get();
+        $articles = Article::where('translated_thumbnail', null)->get();
         return $this->thumbnailUpload($articles);
     }
     public function thumbnailUpload($articles)
