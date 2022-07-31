@@ -35,6 +35,7 @@ class Article extends JsonResource
             'translated_url' => $this->translated_url,
             'translated_title' => json_decode($this->translated_title)->text,
             'translated_description' => json_decode($this->translated_description)->text,
+            'translated_thumbnail' => $this->translated_thumbnail,
             'is_translation' => $this->is_translation,
         ];
     }
