@@ -2,22 +2,24 @@
 
 namespace App\Services;
 
-use Intervention\Image\ImageManagerStatic as Image;
-use Illuminate\Support\Facades\Storage;
 use App\Models\Article;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManagerStatic as Image;
 
 class ThumbnailService
 {
-    public function run()
+    public function run(): string
     {
         try {
+            DB::beginTransaction();
             $articles = Article::where('translated_thumbnail', null)->get();
-                foreach ($articles as $article) {
-                    # code...
-                    $post_id = $article->post_id;
-                    $category = $article->category;
+            foreach ($articles as $article) {
+                # code...
+                $post_id = $article->post_id;
+                $category = $article->category;
 
-                    $img = $this->makeThumbnail(
+                $img = $this->makeThumbnail(
                     $category, $article->publish_date, $article->title
                 );
 
@@ -26,8 +28,12 @@ class ThumbnailService
 
                 Article::where('id', $article->id)->update(['translated_thumbnail' => "$static_url/$category/$post_id.png"]);
             }
+            DB::commit();
+            return 'success';
         } catch (\Throwable $th) {
+            DB::rollBack();
             \Log::error($th->getMessage());
+            return 'fail';
         }
     }
 
@@ -68,8 +74,8 @@ class ThumbnailService
             });
             return $img;
         } catch (\Exception $e) {
+            \Log::error($e->getMessage());
             return $e->getMessage();
-            return $e;
         }
     }
 }

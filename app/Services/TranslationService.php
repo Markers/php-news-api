@@ -12,13 +12,13 @@ class TranslationService
     /**
      * @throws Throwable
      */
-    public function run()
+    public function run(): string
     {
         try {
             DB::beginTransaction();
             $articles = Article::where('is_translation', false)->get();
-            \Log::info("$articles->count() articles are found.");
-            // 에러 나는중
+            $article_length = count($articles);
+            \Log::info("$article_length articles are found.");
             foreach ($articles as $article) {
                 $translated_title = $this->executeTranslation($article->title);
                 $slug = trim($translated_title['text']);
@@ -36,9 +36,11 @@ class TranslationService
                 $article->save();
             }
             DB::commit();
+            return 'success';
         } catch (Throwable $th) {
             DB::rollBack();
-            \Log::error("translation error => ", $th->getMessage());
+            \Log::error("translation error => " . $th->getMessage());
+            return 'fail';
         }
     }
 
@@ -60,7 +62,7 @@ class TranslationService
                 ['target' => 'ko']
             );
         } catch (Throwable $th) {
-            \Log::error("에러", $th->getMessage());
+            \Log::error("번역 API 에러" . $th->getMessage());
         }
     }
 }

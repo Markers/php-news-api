@@ -41,10 +41,14 @@ class CrawlingService
                 $article->content = $this->getContent($article->href);
                 $article->save();
             }
+
+            // 메세지 보내야 함
             DB::commit();
+            return 'success';
         } catch (GuzzleException $e) {
             DB::rollBack();
             \Log::error("crawling error", $e->getMessage());
+            return 'fail';
         }
     }
 
