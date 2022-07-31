@@ -7,31 +7,31 @@ use Illuminate\Support\Facades\Storage;
 
 class ThumbnailService
 {
-    public function thumbnailUpload($articles)
+    public function run()
     {
-
-        foreach ($articles as $article) {
-            $post_id = $article->post_id;
-            $category = $article->category;
-            $publish_date = $article->publish_date;
-            $title = $article->title;
-            $img = $this->makeThumbnail($category, $publish_date, $title);
-        }
+        $article = \App\Article::where('translated_thumbnail', null)->fisrt();
+        $post_id = $article->post_id;
+        $category = $article->category;
+        $publish_date = $article->publish_date;
+        $title = $article->title;
+        $img = $this->makeThumbnail($category, $publish_date, $title);
+        $static_url = config('url');
+        $this->fileUpload("$category/$post_id.png", $img);
+        $article->translated_thumbnail = "$static_url/$category/$post_id.png";
+        $article->save();
     }
 
-    public function fileUpload($path, $img)
+    private function fileUpload($path, $img)
     {
         try {
-            //code...
-            $aa = (string)$img->encode('png');
-            $bb = Storage::disk('s3')->put("$path", $aa);
-            dd($path);
+            $binaryImage = (string)$img->encode('png');
+            Storage::disk('s3')->put("$path", $binaryImage);
         } catch (\Throwable $th) {
             throw $th;
         }
     }
 
-    public function makeThumbnail($category, $publish, $title)
+    private function makeThumbnail($category, $publish, $title)
     {
         try {
             $img = Image::make(public_path("storage/images/$category.png"));
