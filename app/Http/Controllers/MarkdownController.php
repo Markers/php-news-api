@@ -32,7 +32,7 @@ class MarkdownController extends Controller
     public function createMarkdown()
     {
         $markdown_files = [];
-        Article::where('translated_url', null)->chunk(100, function ($articles) {
+        Article::chunk(100, function ($articles) {
             foreach ($articles as $article) {
                 $post_id = $article->post_id;
                 $publish_date = $article->publish_date;
@@ -40,7 +40,9 @@ class MarkdownController extends Controller
                 $title = $this->replaceText($article->slug);
                 $title = $this->replaceDoubleHyphen($title);
                 $category = $article->category;
-                $content = json_decode($article->translated_content)->text;
+                $content = $this->replacePreTag(json_decode($article->translated_content)->text, json_decode($article->translated_content)->input);
+                dd($content);
+                $content = $content;
                 // 파일 저장 경로
                 $file_path = $category . '/' . $publish_year . '/' . $publish_date . '-' . $title . '.md';
                 $markdown = $this->converter->convert($content);
@@ -66,6 +68,35 @@ class MarkdownController extends Controller
                 // $this->commitFiles('kyungseo-park', 'php-news', 'main', "API: " . $dt . "에 $file_count 개 업로드", $markdown_files);
             }
         });
+    }
+
+    public function replacePreTag($content, $en)
+    {
+        $result = $this->replaceCenter($content, $en);
+        return $result;
+    }
+
+    // 아 이거 괜히 만듬
+    public function replaceCenter($ko, $en)
+    {
+        $ko = $this->parserDomContent($ko); // ->getElementsByTagName('pre');
+        $target = $this->parserDomContent($en)->getElementsByTagName('pre');
+        for ($i=0; $i < $ko->getElementsByTagName('pre')->length; $i++) {
+           $ko->getElementsByTagName('pre')[$i]->childNodes[0]->data = $target[$i]->childNodes[0]->data;
+        }
+        // PREFIX: 한글 깨짐..
+        $ko->ownerDocument;
+        dd($domSxe->saveHTML());
+        return $result;
+    }
+
+    public function parserDomContent($content)
+    {
+        $dom = new \DOMDocument();
+        @$dom->loadHTML(strval($content));
+        $xpath = new \DOMXPath($dom);
+        $doms = $xpath->query('//div[@class="content"]');
+        return $doms[0];
     }
 
     public function commitFiles(string $github_nickname, string $repo_name, string $branch, string $commit_message, array $files)
@@ -137,68 +168,5 @@ class MarkdownController extends Controller
         $string = str_replace('&#8217;', '’', $string);
         $string = str_replace('&#8218;', '‚', $string);
         return str_replace('&#8219;', '‛', $string);
-    }
-    // Title은 번역 되어야 함
-    // 이미지 만들고
-    // 이미지 업로드하고
-    public function test()
-    {
-        $articles = Article::where('translated_thumbnail', null)->get();
-        return $this->thumbnailUpload($articles);
-    }
-    public function thumbnailUpload($articles)
-    {
-        foreach ($articles as $article) {
-            $post_id = $article->post_id;
-            $category = $article->category;
-            $publish_date = $article->publish_date;
-            $title = $article->title;
-            $img = $this->makeThumbnail($category, $publish_date, $title);
-            $this->fileUpload("$category/$post_id.png", $img);
-        }
-    }
-
-    public function fileUpload($path, $img)
-    {
-        try {
-            //code...
-            $binaryImage = $img->encode('png');
-            $binaryImage = (string)$binaryImage;
-            Storage::disk('s3')->put("$path", $binaryImage);
-        } catch (\Throwable $th) {
-            throw $th;
-        }
-    }
-
-    public function makeThumbnail($category, $publish, $title)
-    {
-        try {
-            $img = Image::make(public_path("storage/images/$category.png"));
-            $img->text(strtoupper(str_replace('-', ' ', $category)), 960, 239, function ($font) {
-                $font->file(public_path('storage/images/NanumGothicCoding-Bold.ttf'));
-                $font->size(120);
-                $font->color('#fdf6e3');
-                $font->align('center');
-                $font->valign('middle');
-            });
-            $img->text($publish, 960, 390, function ($font) {
-                $font->file(public_path('storage/images/NanumGothicCoding-Bold.ttf'));
-                $font->size(60);
-                $font->color('#fdf6e3');
-                $font->align('center');
-                $font->valign('middle');
-            });
-            $img->text($title, 960, 639, function ($font) {
-                $font->file(public_path('storage/images/NanumGothicCoding-Bold.ttf'));
-                $font->size(50);
-                $font->color('#fdf6e3');
-                $font->align('center');
-                $font->valign('middle');
-            });
-            return $img;
-        } catch (\Exception $e) {
-            return $e->getMessage();
-            return $e;
-        }
     }
 }
