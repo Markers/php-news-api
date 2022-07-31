@@ -162,7 +162,8 @@ class MarkdownController extends Controller
     {
         try {
             //code...
-            $binaryImage = (string)$img->encode('png');
+            $binaryImage = $img->encode('png');
+            $binaryImage = (string)$binaryImage;
             Storage::disk('s3')->put("$path", $binaryImage);
         } catch (\Throwable $th) {
             throw $th;
