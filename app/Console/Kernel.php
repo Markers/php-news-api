@@ -20,7 +20,10 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        $schedule->command('crawling:cron')->everyMinute();
         $schedule->command('translation:cron')->everyMinute();
+        $schedule->command('thumbnail:cron')->everyMinute();
+        $schedule->command('markdown:cron')->everyMinute();
     }
 
     /**

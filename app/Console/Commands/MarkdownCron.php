@@ -3,28 +3,28 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Services\TranslationService;
+use App\Services\MarkdownService;
 
-class TranslationCron extends Command
+class MarkdownCron extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'translation:cron';
+    protected $signature = 'markdown:cron';
+
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = '컨텐츠 번역 작업을 실행합니다.';
-
+    protected $description = '마크다운이 없는 파일을 생성함';
 
     public function __construct()
     {
         parent::__construct();
-        $this->translationService = new TranslationService();
+        $this->markdownService = new MarkdownService();
     }
 
     /**
@@ -35,11 +35,12 @@ class TranslationCron extends Command
     public function handle()
     {
         try {
-            $result = $this->translationService->run();
+            $result = $this->markdownService->run();
             if ($result === 'success') {
-                \Log::info('translationService is finished.');
+                \Log::info('markdownService is finished.');
             }
         } catch (\Throwable $e) {
+            \Log::error($e->getMessage());
             throw $e;
         }
     }

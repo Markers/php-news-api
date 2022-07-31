@@ -3,28 +3,28 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Services\TranslationService;
+use App\Services\ThumbnailService;
 
-class TranslationCron extends Command
+class ThumbnailCron extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'translation:cron';
+    protected $signature = 'thumbnail:cron';
+
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = '컨텐츠 번역 작업을 실행합니다.';
-
+    protected $description = '번역된 썸네일이 없는 애들을 생성함.';
 
     public function __construct()
     {
         parent::__construct();
-        $this->translationService = new TranslationService();
+        $this->thumbnailService = new ThumbnailService();
     }
 
     /**
@@ -35,9 +35,9 @@ class TranslationCron extends Command
     public function handle()
     {
         try {
-            $result = $this->translationService->run();
+            $result = $this->thumbnailService->run();
             if ($result === 'success') {
-                \Log::info('translationService is finished.');
+                \Log::info('thumbnailService is finished.');
             }
         } catch (\Throwable $e) {
             throw $e;
