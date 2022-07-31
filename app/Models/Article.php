@@ -79,6 +79,7 @@ class Article extends Model
         'translated_url',
         'translated_description',
         'translated_content',
+        'translated_thumbnail',
         'is_translation',
     ];
 
