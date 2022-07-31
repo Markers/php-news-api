@@ -17,13 +17,13 @@ class ArticleController extends Controller
                 'item' => 'news, tutorials, videos, php-annotated-monthly, features, events, eap'
             ], 400);
         }
-        $articles = Article::where('is_translation', true)->where('category', $category)->get();
+        $articles = Article::where('category', $category)->orderByDesc('publish_date')->get();
         return new ArticleCollection($articles);
     }
 
     public function allArticle()
     {
-        $articles = Article::where('is_translation', true)->get();
+        $articles = Article::orderByDesc('publish_date')->get();
         return new ArticleCollection($articles);
     }
 
