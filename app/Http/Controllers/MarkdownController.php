@@ -1,37 +1,31 @@
 <?php
 
 namespace App\Http\Controllers;
-// ini_set('memory_limit','-1');
 
 use App\Models\Article;
+use App\Services\GithubService;
 use GrahamCampbell\GitHub\GitHubManager;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use League\HTMLToMarkdown\HtmlConverter;
-use Intervention\Image\ImageManagerStatic as Image;
 
 class MarkdownController extends Controller
 {
+    protected GithubService $githubService;
     protected HtmlConverter $converter;
     protected GitHubManager $github;
 
-    public function __construct(GitHubManager $github)
+    public function __construct(GithubManager $github)
     {
         try {
-            // How to used Environment ?
-            // $environment = new c(array(
-            //     // your configuration here
-            // ));
-            // $environment->addConverter(new HeaderConverter()); // optionally - add converter manually
-            // $converter = new HtmlConverter($environment);
-
             $converter = new HtmlConverter();
             // $converter->getConfig()->setOption('strip_tags', true);
             // $converter->getConfig()->setOption('strip_placeholder_links', true);
             // $converter->getConfig()->setOption('hard_break', true);
             $this->converter = $converter;
             $this->github = $github;
+            $this->githubService = new GithubService();
         } catch (\Throwable $e) {
-            print_r($e);
             exit;
         }
     }
@@ -39,7 +33,7 @@ class MarkdownController extends Controller
     public function createMarkdown()
     {
         $markdown_files = [];
-        Article::chunk(100, function ($articles) {
+        Article::where('translated_url', null)->chunk(100, function ($articles) {
             foreach ($articles as $article) {
                 $post_id = $article->post_id;
                 $publish_date = $article->publish_date;
@@ -50,22 +44,12 @@ class MarkdownController extends Controller
                 $content = $this->replacePreTag(json_decode($article->translated_content)->text, json_decode($article->translated_content)->input);
                 // 파일 저장 경로
                 $file_path = $category . '/' . $publish_year . '/' . $publish_date . '-' . $title . '.md';
-                
-                echo "<pre>";
-                print_r($content);
-                echo "</pre>";
                 $markdown = $this->converter->convert($content);
-
-                exit;
                 try {
                     Storage::disk('local')->put($file_path, $markdown);
                 } catch (\Throwable $th) {
-                    echo 'asd';
-                    print_r($th);
-                    exit;
+                    throw $th;
                 }
-                exit;
-
                 $article->translated_url = $file_path;
                 $article->save();
 
@@ -78,7 +62,7 @@ class MarkdownController extends Controller
             $file_count = count($markdown_files);
             if ($file_count > 0) {
                 $dt = \Carbon\Carbon::now();
-                // $this->commitFiles('kyungseo-park', 'php-news', 'main', "API: " . $dt . "에 $file_count 개 업로드", $markdown_files);
+                $this->commitFiles('kyungseo-park', 'php-news', 'main', "API: " . $dt . "에 $file_count 개 업로드", $markdown_files);
             }
         });
     }
@@ -94,9 +78,9 @@ class MarkdownController extends Controller
     {
         $kos = $this->parserDomContent($ko); // ->getElementsByTagName('pre');
         $targets = $this->parserDomContent($en);
-        for ($j=0; $j < $kos->length; $j++) { 
+        for ($j = 0; $j < $kos->length; $j++) {
             $target = $targets[$j]->getElementsByTagName('pre');
-            for ($i=0; $i < $kos[$j]->getElementsByTagName('pre')->length; $i++) {
+            for ($i = 0; $i < $kos[$j]->getElementsByTagName('pre')->length; $i++) {
                 $kos[$j]->getElementsByTagName('pre')[$i]->childNodes[0]->data = $target[$i]->childNodes[0]->data;
             }
         }
@@ -112,8 +96,7 @@ class MarkdownController extends Controller
         $dom = new \DOMDocument();
         @$dom->loadHTML(mb_convert_encoding(strval($content), 'HTML-ENTITIES', 'UTF-8'));
         $xpath = new \DOMXPath($dom);
-        $doms = $xpath->query('//div[@class="content"]');
-        return $doms;
+        return $xpath->query('//div[@class="content"]');
     }
 
     public function commitFiles(string $github_nickname, string $repo_name, string $branch, string $commit_message, array $files)
