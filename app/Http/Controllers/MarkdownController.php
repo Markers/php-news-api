@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+// ini_set('memory_limit','-1');
 
 use App\Models\Article;
 use GrahamCampbell\GitHub\GitHubManager;
@@ -16,16 +17,22 @@ class MarkdownController extends Controller
     public function __construct(GitHubManager $github)
     {
         try {
+            // How to used Environment ?
+            // $environment = new c(array(
+            //     // your configuration here
+            // ));
+            // $environment->addConverter(new HeaderConverter()); // optionally - add converter manually
+            // $converter = new HtmlConverter($environment);
+
             $converter = new HtmlConverter();
-            // $converter = $converter->getConfig()->setOption('strip_tags', true);
-            // $converter = $converter->getConfig()->setOption('strip_placeholder_links', true);
-            // $converter = $converter->getConfig()->setOption('hard_break', true);
+            // $converter->getConfig()->setOption('strip_tags', true);
+            // $converter->getConfig()->setOption('strip_placeholder_links', true);
+            // $converter->getConfig()->setOption('hard_break', true);
             $this->converter = $converter;
             $this->github = $github;
         } catch (\Throwable $e) {
             print_r($e);
             exit;
-            \Log::error("jobs error - ", $e->getMessage());
         }
     }
 
@@ -41,17 +48,23 @@ class MarkdownController extends Controller
                 $title = $this->replaceDoubleHyphen($title);
                 $category = $article->category;
                 $content = $this->replacePreTag(json_decode($article->translated_content)->text, json_decode($article->translated_content)->input);
-                dd($content);
-                $content = $content;
                 // 파일 저장 경로
                 $file_path = $category . '/' . $publish_year . '/' . $publish_date . '-' . $title . '.md';
+                
+                echo "<pre>";
+                print_r($content);
+                echo "</pre>";
                 $markdown = $this->converter->convert($content);
 
+                exit;
                 try {
                     Storage::disk('local')->put($file_path, $markdown);
                 } catch (\Throwable $th) {
-                    return $th;
+                    echo 'asd';
+                    print_r($th);
+                    exit;
                 }
+                exit;
 
                 $article->translated_url = $file_path;
                 $article->save();
@@ -72,31 +85,35 @@ class MarkdownController extends Controller
 
     public function replacePreTag($content, $en)
     {
-        $result = $this->replaceCenter($content, $en);
-        return $result;
+        // dd($content);
+        return $this->replaceCenter($content, $en);
     }
 
     // 아 이거 괜히 만듬
     public function replaceCenter($ko, $en)
     {
-        $ko = $this->parserDomContent($ko); // ->getElementsByTagName('pre');
-        $target = $this->parserDomContent($en)->getElementsByTagName('pre');
-        for ($i=0; $i < $ko->getElementsByTagName('pre')->length; $i++) {
-           $ko->getElementsByTagName('pre')[$i]->childNodes[0]->data = $target[$i]->childNodes[0]->data;
+        $kos = $this->parserDomContent($ko); // ->getElementsByTagName('pre');
+        $targets = $this->parserDomContent($en);
+        for ($j=0; $j < $kos->length; $j++) { 
+            $target = $targets[$j]->getElementsByTagName('pre');
+            for ($i=0; $i < $kos[$j]->getElementsByTagName('pre')->length; $i++) {
+                $kos[$j]->getElementsByTagName('pre')[$i]->childNodes[0]->data = $target[$i]->childNodes[0]->data;
+            }
         }
-        // PREFIX: 한글 깨짐..
-        $ko->ownerDocument;
-        dd($domSxe->saveHTML());
-        return $result;
+
+        foreach ($kos as $node) {
+            return $node->ownerDocument->saveHtml();
+        }
+        return $kos->ownerDocument->saveHtml();
     }
 
     public function parserDomContent($content)
     {
         $dom = new \DOMDocument();
-        @$dom->loadHTML(strval($content));
+        @$dom->loadHTML(mb_convert_encoding(strval($content), 'HTML-ENTITIES', 'UTF-8'));
         $xpath = new \DOMXPath($dom);
         $doms = $xpath->query('//div[@class="content"]');
-        return $doms[0];
+        return $doms;
     }
 
     public function commitFiles(string $github_nickname, string $repo_name, string $branch, string $commit_message, array $files)
