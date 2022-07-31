@@ -21,7 +21,7 @@ class ThumbnailService
                     $category, $article->publish_date, $article->title
                 );
 
-                $static_url = config('url') ?? "https://static.php-news.com";
+                $static_url = "https://static.php-news.com";
                 $this->fileUpload("$category/$post_id.png", $img);
 
                 Article::where('id', $article->id)->update(['translated_thumbnail' => "$static_url/$category/$post_id.png"]);
