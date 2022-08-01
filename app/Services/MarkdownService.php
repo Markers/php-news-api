@@ -5,6 +5,21 @@ namespace App\Services;
 use App\Models\Article;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use League\HTMLToMarkdown\Converter\BlockquoteConverter;
+use League\HTMLToMarkdown\Converter\CodeConverter;
+use League\HTMLToMarkdown\Converter\CommentConverter;
+use League\HTMLToMarkdown\Converter\DivConverter;
+use League\HTMLToMarkdown\Converter\EmphasisConverter;
+use League\HTMLToMarkdown\Converter\HardBreakConverter;
+use League\HTMLToMarkdown\Converter\HeaderConverter;
+use League\HTMLToMarkdown\Converter\HorizontalRuleConverter;
+use League\HTMLToMarkdown\Converter\ImageConverter;
+use League\HTMLToMarkdown\Converter\LinkConverter;
+use League\HTMLToMarkdown\Converter\ListBlockConverter;
+use League\HTMLToMarkdown\Converter\ListItemConverter;
+use League\HTMLToMarkdown\Converter\PreformattedConverter;
+use League\HTMLToMarkdown\Converter\TextConverter;
+use League\HTMLToMarkdown\Environment;
 use League\HTMLToMarkdown\HtmlConverter;
 
 class MarkdownService
@@ -15,6 +30,10 @@ class MarkdownService
     public function __construct()
     {
         $this->converter = new HtmlConverter();
+        $this->converter->getConfig()->setOption('strip_placeholder_links', true);
+        $this->converter->getConfig()->setOption('remove_nodes', 'style');
+        $this->converter->getConfig()->setOption('remove_nodes', 'script');
+        $this->converter->getConfig()->setOption('strip_tags', true);
         $this->githubService = new GithubService();
     }
 
@@ -26,7 +45,7 @@ class MarkdownService
         $markdown_files = [];
         try {
             DB::beginTransaction();
-            Article::where('translated_url', null)->where('slug', '!=', null)->chunk(100, function ($articles) {
+            Article::where('translated_url', null)->chunk(100, function ($articles) {
                 foreach ($articles as $article) {
                     $post_id = $article->post_id;
                     $publish_date = $article->publish_date;
@@ -38,7 +57,10 @@ class MarkdownService
                     $content = $this->replacePreTag(json_decode($article->translated_content)->text, json_decode($article->translated_content)->input);
                     // 파일 저장 경로
                     $file_path = $category . '/' . $publish_year . '/' . $publish_date . '-' . $title . '.md';
+
                     $markdown = $this->converter->convert($content);
+                    \Log::info($markdown);
+                    exit;
                     try {
                         Storage::disk('local')->put($file_path, $markdown);
                     } catch (\Throwable $th) {
