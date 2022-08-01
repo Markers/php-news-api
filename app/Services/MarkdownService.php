@@ -52,7 +52,7 @@ class MarkdownService
                     $publish_year = substr($article->publish_date, 0, 4);
                     $title = $this->replaceText($article->slug);
                     $title = $this->replaceDoubleHyphen($title);
-                    $title = strtolower(preg_replace('/[^a-zA-Z가-힣0-9]+/', '-', trim($title)));
+                    $title = strtolower(preg_replace('/[0^a-zA-Z가-힣-9]+/', '-', trim($title)));
                     $category = $article->category;
                     $content = $this->replacePreTag(json_decode($article->translated_content)->text, json_decode($article->translated_content)->input);
                     // 파일 저장 경로
@@ -131,6 +131,7 @@ class MarkdownService
     private function replaceDoubleHyphen($str): string
     {
         $str = str_replace('--', '-', $str);
+        \Log::log('strpos($str, --) => '. $str);
         if (strpos($str, '--')) {
             $this->replaceDoubleHyphen($str);
         }
