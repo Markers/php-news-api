@@ -50,17 +50,15 @@ class MarkdownService
                     $post_id = $article->post_id;
                     $publish_date = $article->publish_date;
                     $publish_year = substr($article->publish_date, 0, 4);
-                    \Log::info(">>>>>>>>>>>>>>>>>>" . $article->id);
                     $title = $this->replaceText($article->slug);
                     $title = $this->replaceDoubleHyphen($title);
+                    $title = strtolower(preg_replace('/[^a-zA-Z가-힣0-9]+/', '-', trim($title)));
                     $category = $article->category;
                     $content = $this->replacePreTag(json_decode($article->translated_content)->text, json_decode($article->translated_content)->input);
                     // 파일 저장 경로
                     $file_path = $category . '/' . $publish_year . '/' . $publish_date . '-' . $title . '.md';
 
                     $markdown = $this->converter->convert($content);
-                    \Log::info($markdown);
-                    exit;
                     try {
                         Storage::disk('local')->put($file_path, $markdown);
                     } catch (\Throwable $th) {
@@ -141,7 +139,6 @@ class MarkdownService
 
     private function replaceText($string): string
     {
-        \Log::info('replaceText: ' . gettype($string));
         $string = str_replace('&#147;', '“', $string);
         $string = str_replace('&#128;', '€', $string);
         $string = str_replace('&nbsp;', ' ', $string);
