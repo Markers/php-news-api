@@ -30,7 +30,7 @@ Route::prefix('v1')->group(function () {
     // 포스트 목록을 가져 오는 API => 추후 API 내 페이징 추가 해야함
     Route::get('/articles', [ArticleController::class, 'allArticle']);
     Route::get('/articles/{category}', [ArticleController::class, 'articles']);
-    Route::get('/articles/{category}/{post_id}', [ArticleController::class, 'articlePost']);
+    Route::get('/articles/{category}/{post_id}', [ArticleController::class, 'getArticle']);
 
     // 마크다운 생성
     // Route::get('markdown-format', [\App\Http\Controllers\MarkdownController::class, 'createMarkdown']);
