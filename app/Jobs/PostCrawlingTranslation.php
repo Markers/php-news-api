@@ -5,6 +5,8 @@ namespace App\Jobs;
 use App\Services\CrawlingService;
 use App\Services\MarkdownService;
 use App\Services\TranslationService;
+use App\Services\ThumbnailService;
+use App\Services\WebhookService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -19,6 +21,8 @@ class PostCrawlingTranslation implements ShouldQueue
     protected CrawlingService $crawlingService;
     protected TranslationService $translationService;
     protected MarkdownService $markdownService;
+    protected ThumbnailService $thumbnailService;
+    protected WebhookService $webhookService;
 
     /**
      * Create a new job instance.
@@ -31,6 +35,7 @@ class PostCrawlingTranslation implements ShouldQueue
         $this->translationService = new TranslationService();
         $this->markdownService = new MarkdownService();
         $this->thumbnailService = new ThumbnailService();
+        $this->webhookService = new WebhookService();
     }
 
     /**
@@ -47,8 +52,10 @@ class PostCrawlingTranslation implements ShouldQueue
             \Log::info('translationService is finished.');
             $this->markdownService->run();
             \Log::info('markdownService is finished.');
-            $this->thumbnailService->run();
+            $result = $this->thumbnailService->run();
             \Log::info('thumbnailService is finished.');
+            $this->webhookService->run($result);
+            \Log::info('webhookService is finished.');
         } catch (\Throwable $e) {
             \Log::error("jobs error - ", $e->getMessage());
         }

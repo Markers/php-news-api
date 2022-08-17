@@ -27,6 +27,7 @@ class ThumbnailService
                 $this->fileUpload("$category/$post_id.png", $img);
 
                 Article::where('id', $article->id)->update(['translated_thumbnail' => "$static_url/$category/$post_id.png"]);
+                return Article::find($article->id);
             }
             DB::commit();
             return 'success';
